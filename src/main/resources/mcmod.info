@@ -1,0 +1,16 @@
+[
+{
+  "modid": "friendbot",
+  "name": "FriendBot",
+  "description": "A mod that automates message sending depending on chat output.",
+  "version": "1.0",
+  "mcversion": "1.8.9-forge",
+  "url": "",
+  "updateUrl": "https://github.com/Zenakin-1777/FriendBot",
+  "authorList": ["Zenakin"],
+  "credits": "",
+  "logoFile": "logo.png",
+  "screenshots": [],
+  "dependencies": []
+}
+]
