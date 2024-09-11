@@ -66,10 +66,7 @@ public class FriendBot {
         }
 
         public boolean isOnList(String name) {
-            if (NameListPage.nameList.contains(name)){
-                return  true;
-            }
-            else return false;
+            return NameListPage.nameList.contains(name);
         }
     }
 }

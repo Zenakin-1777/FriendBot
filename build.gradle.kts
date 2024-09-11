@@ -2,6 +2,7 @@
 
 import org.polyfrost.gradle.util.noServerRunConfigs
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+// DIDNT WORK TO IMPLEMENT SOUNDS import org.gradle.api.tasks.compile.JavaCompile
 
 // Adds support for kotlin, and adds the Polyfrost Gradle Toolkit
 // which we use to prepare the environment.
@@ -91,6 +92,10 @@ dependencies {
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
 
+    // Add Lombok | DIDNT WORK TO IMPLEMENT SOUNDS
+    // modCompileOnly("org.projectlombok:lombok:1.18.28")
+    // annotationProcessor("org.projectlombok:lombok:1.18.28") // For annotation processing
+
     // Adds DevAuth, which we can use to log in to Minecraft in development.
     modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.2.0")
 
@@ -102,6 +107,14 @@ dependencies {
 }
 
 tasks {
+    /* DIDNT WORK TO IMPLEMENT SOUNDS
+    tasks.withType<JavaCompile> {
+        if (name == "compileJava") {
+            options.annotationProcessorGeneratedSourcesDirectory.set(layout.buildDirectory.dir("generated/sources/annotationProcessor/java/main"))
+        }
+    }
+     */
+
     // Processes the `src/resources/mcmod.info`, `fabric.mod.json`, or `mixins.${mod_id}.json` and replaces
     // the mod id, name and version with the ones in `gradle.properties`
     processResources {

@@ -8,6 +8,7 @@ import cc.polyfrost.oneconfig.config.annotations.Text;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
+import com.zenakin.friendbot.util.AudioManager;
 
 public class NameListPage {
     public static List<String> nameList = new ArrayList<>();
@@ -25,6 +26,7 @@ public class NameListPage {
             text = "ADD"
     )
     public static void addName() {
+        AudioManager.getInstance().playSound("/assets/friendbot/sounds/notification_ping.ogg");
         nameList.add(name);
     }
 

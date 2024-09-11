@@ -1,0 +1,8 @@
+{
+  "notification_ping": {
+    "category": "master",
+    "sounds": [
+      "friendbot:sounds/notification_ping"
+    ]
+  }
+}
