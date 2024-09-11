@@ -57,29 +57,19 @@ public class FriendBot {
         }
 
         public String extractName(String message) {
-            if (/* TODO: IS IT EVEN A NAME IN THE MSG??? */) {
-                String name;
-                //TODO: logic to extract name
+            if (message.startsWith("Friend ") && (message.endsWith(" joined") || message.endsWith(" left"))) {
+                String name = message.substring(7, message.length() - 6);
                 return name;
-            }
-            else {
+            } else {
                 return null;
             }
         }
 
         public boolean isOnList(String name) {
-            if (name == null) {
-                return false;
+            if (NameListPage.nameList.contains(name)){
+                return  true;
             }
-
-            switch (name) {
-                case "Name1":
-                    return NameListPage.name1;
-                case "Name2":
-                    return NameListPage.name2;
-                default:
-                    return false; // Return false if the map name doesn't match any known maps
-            }
+            else return false;
         }
     }
 }

@@ -1,7 +1,51 @@
 package com.zenakin.friendbot.config.pages;
 
-public class NameListPage {
+import java.util.ArrayList;
+import java.util.List;
 
-    //TODO: logic for storing IGNs
+import cc.polyfrost.oneconfig.config.annotations.Button;
+import cc.polyfrost.oneconfig.config.annotations.Text;
+import cc.polyfrost.oneconfig.config.data.OptionSize;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+
+public class NameListPage {
+    public static List<String> nameList = new ArrayList<>();
+
+    @Text(
+            name = "IGN of the player",
+            placeholder = "Paste their username here",
+            size = OptionSize.SINGLE
+    )
+    public static String name = "";
+
+    @Button(
+            name = "Add IGN",
+            description = "Add the IGN of the player to the list",
+            text = "ADD"
+    )
+    public static void addName() {
+        nameList.add(name);
+    }
+
+    @Button(
+            name = "Remove IGN",
+            description = "Remove the IGN of the player from the list",
+            text = "REMOVE"
+    )
+    public static void removeName(String name) {
+        nameList.remove(name);
+    }
+
+    @Button(
+            name = "List IGNs",
+            description = "Display the list of currently stored IGNs",
+            text = "LIST"
+    )
+    public static void listNames() {
+        for (String IGN : nameList) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(IGN));
+        }
+    }
 
 }
