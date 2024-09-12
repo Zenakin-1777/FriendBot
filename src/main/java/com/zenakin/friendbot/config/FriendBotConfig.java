@@ -11,7 +11,6 @@ import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.*;
 import com.zenakin.friendbot.FriendBot;
 import com.zenakin.friendbot.config.pages.PageTBD;
-import com.zenakin.friendbot.util.AudioManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 
@@ -36,25 +35,27 @@ public class FriendBotConfig extends Config {
     public static String customMessage = "";
 
     @Page(
-            name = "IGN list",
+            name = "Page TBD",
             location = PageLocation.TOP,
-            description = "Page where you can edit the list of usernames"
+            description = "A page that has yet to be used for anything.."
     )
     public PageTBD pageTBD = new PageTBD();
 
     @Text(
             name = "IGN of the player",
-            placeholder = "Paste their username here",
-            size = OptionSize.SINGLE,
-            category = "Name List"
+            placeholder = "Put a username here",
+            category = "Name List",
+            subcategory = "EDIT"
     )
     public static String name = "";
 
     @Button(
             name = "List IGNs",
-            description = "Display the list of currently stored IGNs",
+            description = "Display the list of currently stored IGNs in chat",
             text = "LIST",
-            category = "Name List"
+            category = "Name List",
+            subcategory = "EDIT",
+            size = 1
     )
     public static void listNames() {
         for (String IGN : nameList) {
@@ -63,10 +64,24 @@ public class FriendBotConfig extends Config {
     }
 
     @Button(
+            name = "Remove IGN",
+            description = "Remove the IGN of the player from the list",
+            text = "REMOVE",
+            category = "Name List",
+            subcategory = "EDIT",
+            size = 1
+    )
+    public static void removeName() {
+        nameList.remove(name);  // Remove the name from the set
+    }
+
+    @Button(
             name = "Add IGN",
             description = "Add the IGN of the player to the list",
             text = "ADD",
-            category = "Name List"
+            category = "Name List",
+            subcategory = "EDIT",
+            size = 1
     )
     public static void addName() {
         // Play sound when adding a name
@@ -79,16 +94,6 @@ public class FriendBotConfig extends Config {
             nameList.add(name);  // Automatically prevents duplicates
             sortNameList();  // Sort the list alphabetically
         }
-    }
-
-    @Button(
-            name = "Remove IGN",
-            description = "Remove the IGN of the player from the list",
-            text = "REMOVE",
-            category = "Name List"
-    )
-    public static void removeName() {
-        nameList.remove(name);  // Remove the name from the set
     }
 
     /* TODO: make a backup button that will save lists as a restore point
@@ -108,15 +113,6 @@ public class FriendBotConfig extends Config {
     )
     public static boolean separator;
 
-    @Text(
-            name = "CLEAR CONFIRMATION",
-            placeholder = "Type 'Clear' before clicking the button to confirm..",
-            size = OptionSize.DUAL,
-            category = "Name List",
-            subcategory = "CLEAR"
-    )
-    public static String clearCode = "";
-
     @Button(
             name = "Clear List",
             description = "CAUTION - WILL DELETE ALL NAMES IN THE LIST!!!",
@@ -132,6 +128,14 @@ public class FriendBotConfig extends Config {
             nameList.clear();
         }
     }
+
+    @Text(
+            name = "CLEAR CONFIRMATION",
+            placeholder = "Type 'Clear' to confirm..",
+            category = "Name List",
+            subcategory = "CLEAR"
+    )
+    public static String clearCode = "";
 
     @Switch(
             name = "Erase Clear Text",
