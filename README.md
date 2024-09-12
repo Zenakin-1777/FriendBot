@@ -9,6 +9,9 @@ Future Features:
 - [QOL] backup button for IGN list
 - [QOL] add built in time converter
 - [QOL] support for different chat formats
-- [QOL] discord integration (webhook support)
 - [QOL+] discord integration (remote control)
 - [QOL+] remote activation and message sending
+
+Working on rn:
+- [QOL] discord integration (webhook support)
+- [QOL] remove name after a reply with prompt is given
