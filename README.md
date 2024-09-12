@@ -7,6 +7,7 @@ Credit:
 Future Features:
 - [QOL] reply option
 - [QOL] backup button for IGN list
+- [QOL] add built in time converter
 - [QOL] support for different chat formats
 - [QOL] discord integration (webhook support)
 - [QOL+] discord integration (remote control)

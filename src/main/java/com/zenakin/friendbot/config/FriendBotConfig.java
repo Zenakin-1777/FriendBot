@@ -2,6 +2,7 @@ package com.zenakin.friendbot.config;
 
 import cc.polyfrost.oneconfig.config.annotations.Button;
 import cc.polyfrost.oneconfig.config.annotations.Info;
+import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.annotations.Text;
 import cc.polyfrost.oneconfig.config.data.InfoType;
@@ -30,13 +31,66 @@ public class FriendBotConfig extends Config {
     @Text(
             name = "Custom Message Contents",
             placeholder = "Paste your message here",
-            multiline = true
+            multiline = true,
+            category = "Message Settings"
     )
     public static String customMessage = "";
 
+    @Info(
+            text = "The timing settings are all in milliseconds. (More units will be added soon)",
+            type = InfoType.INFO,
+            size = OptionSize.DUAL,
+            category = "Message Settings",
+            subcategory = "Message Timing"
+    )
+
+    /* FUTURE FEATURE
+    @Dropdown(
+            name = "Time Unit",
+            description = "Unit used between milliseconds, seconds and minutes",
+            options = {"Milliseconds", "Seconds", "Minutes", "Hours"},
+            category = "Message Settings",
+            subcategory = "Message Timing"
+    )
+    public static int timeUnit = 1;
+     */
+
+    @Number(
+            name = "Initial Delay",
+            description = "The delay before starting to send messages (max 1hr)",
+            min = 1000,
+            max = 3600000,
+            step = 1000,
+            category = "Message Settings",
+            subcategory = "Message Timing"
+    )
+    public static int initialMessageDelay = 4000;
+
+    @Number(
+            name = "Subsequent Message Delay",
+            description = "The time to wait before sending the next part of a message. (if the message is longer than the set Message Length",
+            min = 1000,
+            max = 10000,
+            step = 500,
+            category = "Message Settings",
+            subcategory = "Message Timing"
+    )
+    public static int timeBetweenMessages = 2000;
+
+    @Slider(
+            name = "Message Length",
+            description = "The number of characters each message can have. (depending on the length of the person's name, length may vary, but on average, there is around an 80 character limit",
+            min = 5,
+            max = 200,
+            step = 5,
+            category = "Message Settings",
+            subcategory = "Message Timing"
+    )
+    public static int messageLength = 80;
+
     @Page(
             name = "Page TBD",
-            location = PageLocation.TOP,
+            location = PageLocation.BOTTOM,
             description = "A page that has yet to be used for anything.."
     )
     public PageTBD pageTBD = new PageTBD();
