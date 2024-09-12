@@ -1,4 +1,4 @@
-A mod I made to automatically filter out Hypixel friends that get online while the mod is active, and compares with a given list of IGNs, which, when matched, sends a custom message to them.
+A mod I made (that ChatGPT wrote) to automatically filter out Hypixel friends that get online while the mod is active, and compares with a given list of IGNs, which, when matched, sends a custom message to them.
 
 Credit:
 - ChatGPT
