@@ -1,7 +1,9 @@
 package com.zenakin.friendbot;
 
 import com.zenakin.friendbot.config.FriendBotConfig;
+import com.zenakin.friendbot.utils.AudioManager;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
@@ -24,6 +26,7 @@ public class FriendBot {
     @Mod.Instance
     public static FriendBot instance;
     public FriendBotConfig config;
+    public static String lastPart;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
@@ -43,28 +46,41 @@ public class FriendBot {
         public void onClientChatReceived(ClientChatReceivedEvent event) {
             // Get the chat message
             String message = event.message.getUnformattedText();
-            String name = extractName(message);
+            String name = extractContent(message);
 
             if (name != null && isOnList(name)) {
+                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
                 // Schedule message sending with a delay
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        sendMessagesInChunks("/t " + name + " " + FriendBotConfig.customMessage);
+                        sendMessagesInChunks(name, FriendBotConfig.customMessage);
                     }
-                }, FriendBotConfig.initialMessageDelay); //TODO: delay between 0 and infinity
+                }, FriendBotConfig.initialMessageDelay);
             }
-        }                                           //TODO: DON'T FORGET TO CONVERT TO AND FROM MILLIS
 
-        private void sendMessagesInChunks(String fullMessage) {
-            List<String> messages = splitMessage(fullMessage, FriendBotConfig.messageLength); //TODO: length between 10 and 200
-            for (String message : messages) {
-                Minecraft.getMinecraft().thePlayer.sendChatMessage(message);
-                try {
-                    Thread.sleep(FriendBotConfig.timeBetweenMessages); //TODO: delay between 1 and infinity
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
+            if (message.startsWith("To") && message.endsWith(lastPart)) {
+                FriendBotConfig.nameList.remove(name);
+                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(name + " has been removed from list!!!"));
+            }
+        }
+
+        private void sendMessagesInChunks(String name, String fullMessage) {
+            List<String> messages = splitMessage(fullMessage, FriendBotConfig.messageLength);
+            lastPart = messages.get(messages.size() - 1);
+
+            Timer timer = new Timer();
+            for (int i = 0; i < messages.size(); i++) {
+                final String message = messages.get(i);
+                // Schedule each message with a delay
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + name + " " + message);
+                    }
+                }, (long) i * FriendBotConfig.timeBetweenMessages);
             }
         }
 
@@ -93,7 +109,7 @@ public class FriendBot {
             return parts;
         }
 
-        public String extractName(String message) {
+        public String extractContent(String message) {
             if (message.startsWith("Friend > ") && message.endsWith(" joined.")) {
                 return message.substring(9, message.length() - 8);
             } else {

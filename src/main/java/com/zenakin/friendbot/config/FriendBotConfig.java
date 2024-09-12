@@ -12,6 +12,7 @@ import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.*;
 import com.zenakin.friendbot.FriendBot;
 import com.zenakin.friendbot.config.pages.PageTBD;
+import com.zenakin.friendbot.utils.AudioManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 
@@ -24,9 +25,41 @@ public class FriendBotConfig extends Config {
     @Switch(
             name = "Main Toggle",
             description = "Enable/Dissable most features of the mod",
-            size = OptionSize.DUAL
+            size = OptionSize.DUAL,
+            category = "General"
     )
     public static boolean isModEnabled = true;
+
+    @Slider(
+            name = "Sound Volume",
+            description = "The volume of the sounds the mod will play",
+            min = 0,
+            max = 1.0f,
+            category = "General",
+            subcategory = "Sounds"
+    )
+    public static float customVolume = 1.0f;
+
+    @Slider(
+            name = "Sound Pitch",
+            description = "The pitch of the sounds the mod will play",
+            min = 0,
+            max = 2.0f,
+            category = "General",
+            subcategory = "Sounds"
+    )
+    public static float customPitch = 1.0f;
+
+    @Button(
+            name = "Test Sound",
+            description = "Play the sound",
+            text = "PLAY",
+            subcategory = "Sounds",
+            size = OptionSize.DUAL
+    )
+    public static void playSound() {
+        AudioManager.playLoudSound("friendbot:notification_ping", customVolume, customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
+    }
 
     @Text(
             name = "Custom Message Contents",
@@ -43,6 +76,7 @@ public class FriendBotConfig extends Config {
             category = "Message Settings",
             subcategory = "Message Timing"
     )
+    public static boolean timingInfo;
 
     /* FUTURE FEATURE
     @Dropdown(
@@ -75,7 +109,7 @@ public class FriendBotConfig extends Config {
             category = "Message Settings",
             subcategory = "Message Timing"
     )
-    public static int timeBetweenMessages = 2000;
+    public static int timeBetweenMessages = 3500;
 
     @Slider(
             name = "Message Length",
@@ -141,7 +175,7 @@ public class FriendBotConfig extends Config {
         // Play sound when adding a name
         // OLD --> AudioManager.getInstance().playSound("friendbot:notification_ping.ogg");
         // STILL NOT WORKING!!! --> AudioManager.playPingSound();
-        //TODO: SOUND TESTING CAN BE DONE HERE
+        // This one worked: AudioManager.playLoudSound("friendbot:notification_ping", customVolume, customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
 
         // Only add the name if it is not already in the set
         if (!nameList.contains(name)) {

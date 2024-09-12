@@ -1,5 +1,9 @@
 package com.zenakin.friendbot.utils;
 
+import com.zenakin.friendbot.config.FriendBotConfig;
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.Vec3;
+
 public class AudioManager {
 /* V2 NEITHER
     public static void playPingSound() {
@@ -115,4 +119,25 @@ public class AudioManager {
         numSounds--;
     }
  */
+
+        /*
+        private static Minecraft mc = Minecraft.getMinecraft();
+        private static long lastPlayed = System.currentTimeMillis();
+        private static String[] defaultSounds = new String[]{"mob.blaze.hit", "fire.ignite", "random.orb", "random.break", "mob.guardian.land.hit", "note.pling", "friendbot:notification_ping"};
+
+        public static void notificationPing() {
+            if(System.currentTimeMillis() - lastPlayed <= 5){
+                return;
+            }
+            playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, mc.thePlayer.getPositionVector());
+            lastPlayed = System.currentTimeMillis();
+        }
+         */
+
+        public static void playLoudSound(String sound, Float volume, Float pitch, Vec3 pos) {
+            Minecraft.getMinecraft().addScheduledTask(() -> {
+                Minecraft.getMinecraft().theWorld.playSound(pos.xCoord, pos.yCoord+1.62, pos.zCoord, sound, volume, pitch, false);
+            });
+        }
+
 }

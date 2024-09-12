@@ -1,7 +1,5 @@
 {
   "notification_ping": {
-    "sounds": [
-      "friendbot:sounds/notification_ping"
-    ]
+    "sounds": [{"name": "notification_ping", "steam":  true}], "category": "master"
   }
 }
