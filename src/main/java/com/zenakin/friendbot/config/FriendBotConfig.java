@@ -5,7 +5,9 @@ import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.Mod;
 import cc.polyfrost.oneconfig.config.data.ModType;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
+import cc.polyfrost.oneconfig.config.data.PageLocation;
 import com.zenakin.friendbot.FriendBot;
+import com.zenakin.friendbot.config.pages.NameListPage;
 
 public class FriendBotConfig extends Config {
     public static FriendBotConfig instance;
@@ -23,6 +25,13 @@ public class FriendBotConfig extends Config {
             multiline = true
     )
     public static String customMessage = "";
+
+    @Page(
+            name = "IGN list",
+            location = PageLocation.TOP,
+            description = "Page where you can edit the list of usernames"
+    )
+    public NameListPage nameListPage = new NameListPage();
 
     public FriendBotConfig() {
         super(new Mod(FriendBot.NAME, ModType.UTIL_QOL, "/assets.friendbot/logo.png"), FriendBot.MODID + ".json");

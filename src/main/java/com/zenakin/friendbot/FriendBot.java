@@ -23,15 +23,15 @@ public class FriendBot {
     public static final String MODID = "@ID@";
     public static final String NAME = "@NAME@";
     public static final String VERSION = "@VER@";
-
-    @Mod.EventHandler
-    public void preInit(FMLPreInitializationEvent event) {
-        // Some common setup code
-    }
+    @Mod.Instance
+    public static FriendBot instance;
+    public FriendBotConfig config;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
         // Register event handler
+        config = new FriendBotConfig();
+        MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(new ChatEventHandler());
     }
 
@@ -50,6 +50,7 @@ public class FriendBot {
 
             if (name == null || !isOnList(name)) {
                 //TODO: logic to abort safely
+                return;
             } else {
                 // Send a response to chat
                 event.player.addChatMessage(new ChatComponentText("/t " + name + FriendBotConfig.customMessage));
@@ -58,8 +59,7 @@ public class FriendBot {
 
         public String extractName(String message) {
             if (message.startsWith("Friend ") && (message.endsWith(" joined") || message.endsWith(" left"))) {
-                String name = message.substring(7, message.length() - 6);
-                return name;
+                return message.substring(7, message.length() - 6);
             } else {
                 return null;
             }
