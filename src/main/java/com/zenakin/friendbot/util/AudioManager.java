@@ -6,6 +6,9 @@ import net.minecraft.client.audio.SoundCategory;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 
+import net.minecraft.client.audio.PositionedSoundRecord;
+import net.minecraft.util.ResourceLocation;
+
 import javax.sound.sampled.*;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +16,15 @@ import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 public class AudioManager {
+/* V2 NEITHER
+    public static void playPingSound() {
+        Minecraft.getMinecraft().getSoundHandler().playSound(
+                PositionedSoundRecord.create(new ResourceLocation("friendbot", "notification_ping"))
+        );
+    }
+ */
+
+/* V1 DIDN'T WORK
     private final Minecraft mc = Minecraft.getMinecraft();
     private static AudioManager instance;
 
@@ -117,4 +129,5 @@ public class AudioManager {
         lastPingTime = currentTime;
         numSounds--;
     }
+ */
 }

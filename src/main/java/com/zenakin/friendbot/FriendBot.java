@@ -1,7 +1,8 @@
 package com.zenakin.friendbot;
 
 import com.zenakin.friendbot.config.FriendBotConfig;
-import com.zenakin.friendbot.config.pages.NameListPage;
+import com.zenakin.friendbot.config.pages.PageTBD;
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.MinecraftForge;
@@ -48,6 +49,8 @@ public class FriendBot {
 
             String name = extractName(message);
 
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("Name: " + name + " | From: " + message));
+
             if (name == null || !isOnList(name)) {
                 //TODO: logic to abort safely
                 return;
@@ -66,7 +69,7 @@ public class FriendBot {
         }
 
         public boolean isOnList(String name) {
-            return NameListPage.nameList.contains(name);
+            return FriendBotConfig.nameList.contains(name);
         }
     }
 }
