@@ -92,6 +92,8 @@ dependencies {
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
 
+    implementation("org.apache.httpcomponents:httpclient:4.5.13")
+
     // Add Lombok | DIDNT WORK TO IMPLEMENT SOUNDS
     // modCompileOnly("org.projectlombok:lombok:1.18.28")
     // annotationProcessor("org.projectlombok:lombok:1.18.28") // For annotation processing

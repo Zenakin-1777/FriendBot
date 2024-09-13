@@ -55,15 +55,17 @@ public class FriendBot {
                     @Override
                     public void run() {
                         sendMessagesInChunks(name, FriendBotConfig.customMessage);
+                        //TODO: add to webhook method saying started
                     }
                 }, FriendBotConfig.initialMessageDelay);
             }
 
             //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
             if (message.startsWith("To") && message.endsWith(lastPart)) {
-                FriendBotConfig.nameList.remove(name);
+                //TODO: FIX THIS - FriendBotConfig.nameList.remove(name);
                 AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(name + " has been removed from list!!!"));
+                //TODO: add to webhook method saying complete
             }
         }
 
@@ -121,4 +123,6 @@ public class FriendBot {
             return FriendBotConfig.nameList.contains(name);
         }
     }
+
+
 }

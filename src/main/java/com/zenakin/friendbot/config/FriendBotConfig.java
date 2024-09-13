@@ -62,6 +62,14 @@ public class FriendBotConfig extends Config {
     }
 
     @Text(
+            name = "Discord Webhook",
+            placeholder = "https://discord.com/api/webhooks/...",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static String webhookURL = "";
+
+    @Text(
             name = "Custom Message Contents",
             placeholder = "Paste your message here",
             multiline = true,
