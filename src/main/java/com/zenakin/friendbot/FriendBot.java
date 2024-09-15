@@ -2,6 +2,7 @@ package com.zenakin.friendbot;
 
 import com.zenakin.friendbot.config.FriendBotConfig;
 import com.zenakin.friendbot.utils.AudioManager;
+import com.zenakin.friendbot.utils.DiscordWebhookUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,12 +13,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 
-@Mod(modid = com.zenakin.friendbot.FriendBot.MODID, name = com.zenakin.friendbot.FriendBot.NAME, version = com.zenakin.friendbot.FriendBot.VERSION)
+@Mod(modid = FriendBot.MODID, name = FriendBot.NAME, version = FriendBot.VERSION)
 public class FriendBot {
 
     public static final String MODID = "@ID@";
@@ -27,6 +25,8 @@ public class FriendBot {
     public static FriendBot instance;
     public FriendBotConfig config;
     public static String lastPart;
+    public static String extractedName = "";
+    public static String messagedPlayer = "";
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
@@ -46,30 +46,39 @@ public class FriendBot {
         public void onClientChatReceived(ClientChatReceivedEvent event) {
             // Get the chat message
             String message = event.message.getUnformattedText();
-            String name = extractContent(message);
+            extractContent(message);
 
-            if (name != null && isOnList(name)) {
+            if (!Objects.equals(extractedName, "") && isOnList(extractedName)) {
+                messagedPlayer = extractedName;
+                extractedName = "";
                 AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
                 // Schedule message sending with a delay
                 new Timer().schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        sendMessagesInChunks(name, FriendBotConfig.customMessage);
-                        //TODO: add to webhook method saying started
+                        sendMessagesInChunks(messagedPlayer, FriendBotConfig.customMessage);
+                        DiscordWebhookUtils.sendWebhookMessage("Listed player: [" + messagedPlayer + "] detected! Sending messages..");
                     }
                 }, FriendBotConfig.initialMessageDelay);
             }
 
             //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
             if (message.startsWith("To") && message.endsWith(lastPart)) {
-                //TODO: FIX THIS - FriendBotConfig.nameList.remove(name);
                 AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(name + " has been removed from list!!!"));
-                //TODO: add to webhook method saying complete
+                DiscordWebhookUtils.sendWebhookMessage("@everyone Finished sending message to [" + messagedPlayer + "].");
+                FriendBotConfig.removeNameExternally(messagedPlayer);
+                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(messagedPlayer + " has been removed from list!!!"));
+                messagedPlayer = "";
             }
+            /* TODO: Failed check triggering prematurely
+            else if (!Objects.equals(messagedPlayer, "")) {
+                DiscordWebhookUtils.sendWebhookMessage("@everyone ERROR: Didn't finish sending message to [" + messagedPlayer + "]..");
+                messagedPlayer = "";
+            }
+            */
         }
 
-        private void sendMessagesInChunks(String name, String fullMessage) {
+        private void sendMessagesInChunks(String name1, String fullMessage) {
             List<String> messages = splitMessage(fullMessage, FriendBotConfig.messageLength);
             lastPart = messages.get(messages.size() - 1);
 
@@ -80,9 +89,9 @@ public class FriendBot {
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + name + " " + message);
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + name1 + " " + message);
                     }
-                }, (long) i * FriendBotConfig.timeBetweenMessages);
+                }, (long) FriendBotConfig.ping + ((long) i * FriendBotConfig.timeBetweenMessages));
             }
         }
 
@@ -111,16 +120,14 @@ public class FriendBot {
             return parts;
         }
 
-        public String extractContent(String message) {
+        public void extractContent(String message) {
             if (message.startsWith("Friend > ") && message.endsWith(" joined.")) {
-                return message.substring(9, message.length() - 8);
-            } else {
-                return null;
+                extractedName = message.substring(9, message.length() - 8);
             }
         }
 
-        public boolean isOnList(String name) {
-            return FriendBotConfig.nameList.contains(name);
+        public boolean isOnList(String nameOnList) {
+            return FriendBotConfig.nameList.contains(nameOnList);
         }
     }
 

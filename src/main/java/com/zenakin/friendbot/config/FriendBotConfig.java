@@ -5,6 +5,7 @@ import cc.polyfrost.oneconfig.config.annotations.Info;
 import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
 import cc.polyfrost.oneconfig.config.annotations.Text;
+import cc.polyfrost.oneconfig.config.core.OneColor;
 import cc.polyfrost.oneconfig.config.data.InfoType;
 import cc.polyfrost.oneconfig.config.data.OptionSize;
 import cc.polyfrost.oneconfig.config.Config;
@@ -20,7 +21,7 @@ import java.util.*;
 
 public class FriendBotConfig extends Config {
     public static FriendBotConfig instance;
-    public static Set<String> nameList = new LinkedHashSet<>();
+    public static List<String> nameList;
 
     @Switch(
             name = "Main Toggle",
@@ -29,6 +30,16 @@ public class FriendBotConfig extends Config {
             category = "General"
     )
     public static boolean isModEnabled = true;
+
+    @Number(
+            name = "Ping",
+            description = "Your ping in milliseconds",
+            min = 5,
+            max = 5000,
+            step = 10,
+            category = "General"
+    )
+    public static int ping = 100;
 
     @Slider(
             name = "Sound Volume",
@@ -61,13 +72,60 @@ public class FriendBotConfig extends Config {
         AudioManager.playLoudSound("friendbot:notification_ping", customVolume, customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
     }
 
+    @Info(
+            text = "You must first create your own Discord server and webhook before changing these settings.",
+            type = InfoType.INFO,
+            size = 2,
+            category = "Discord Integration"
+    )
+    public static boolean webhookInfoLine;
+
     @Text(
-            name = "Discord Webhook",
+            name = "Webhook URL",
             placeholder = "https://discord.com/api/webhooks/...",
             category = "Discord Integration",
             subcategory = "Webhook"
     )
     public static String webhookURL = "";
+
+    @Text(
+            name = "Username",
+            placeholder = "FriendBot",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static String webhookUsername = "FriendBot";
+
+    @Text(
+            name = "Avatar URL",
+            placeholder = "https://image.site.com/assets/img/icon.png",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static String webhookAvatarURL = "https://freobot.vercel.app/assets/img/freo.png";
+
+    @Text(
+            name = "Title",
+            placeholder = "Cool Bot 420",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static String webhookTitle = "FriendBot Updates";
+
+    @Text(
+            name = "Description",
+            placeholder = "Info on FriendBot",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static String webhookDescription = "Update on FriendBot's status";
+
+    @Color(
+            name = "Color",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static OneColor webhookColor = new OneColor(206, 56, 216);
 
     @Text(
             name = "Custom Message Contents",
@@ -130,13 +188,6 @@ public class FriendBotConfig extends Config {
     )
     public static int messageLength = 80;
 
-    @Page(
-            name = "Page TBD",
-            location = PageLocation.BOTTOM,
-            description = "A page that has yet to be used for anything.."
-    )
-    public PageTBD pageTBD = new PageTBD();
-
     @Text(
             name = "IGN of the player",
             placeholder = "Put a username here",
@@ -168,7 +219,11 @@ public class FriendBotConfig extends Config {
             size = 1
     )
     public static void removeName() {
-        nameList.remove(name);  // Remove the name from the set
+        nameList.remove(name);
+    }
+
+    public static void removeNameExternally(String externalName) {
+        nameList.remove(externalName);
     }
 
     @Button(
@@ -240,6 +295,15 @@ public class FriendBotConfig extends Config {
             subcategory = "CLEAR"
     )
     public static boolean toggleClearErase = true;
+
+    @Page(
+            name = "Page TBD",
+            location = PageLocation.BOTTOM,
+            description = "A page that has yet to be used for anything..",
+            category = "General",
+            subcategory = "Pages"
+    )
+    public PageTBD pageTBD = new PageTBD();
 
     // Method to sort the list alphabetically
     private static void sortNameList() {
