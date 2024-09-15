@@ -1,5 +1,6 @@
 package com.zenakin.friendbot;
 
+import cc.polyfrost.oneconfig.config.core.OneColor;
 import com.zenakin.friendbot.config.FriendBotConfig;
 import com.zenakin.friendbot.utils.AudioManager;
 import com.zenakin.friendbot.utils.DiscordWebhookUtils;
@@ -57,7 +58,7 @@ public class FriendBot {
                     @Override
                     public void run() {
                         sendMessagesInChunks(messagedPlayer, FriendBotConfig.customMessage);
-                        DiscordWebhookUtils.sendWebhookMessage("Listed player: [" + messagedPlayer + "] detected! Sending messages..");
+                        notifyViaWebhook("FriendBot Update","Listed player detected!", "Sending messages to player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorStart);
                     }
                 }, FriendBotConfig.initialMessageDelay);
             }
@@ -65,7 +66,7 @@ public class FriendBot {
             //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
             if (message.startsWith("To") && message.endsWith(lastPart)) {
                 AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                DiscordWebhookUtils.sendWebhookMessage("@everyone Finished sending message to [" + messagedPlayer + "].");
+                notifyViaWebhook("@everyone FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorDone);
                 FriendBotConfig.removeNameExternally(messagedPlayer);
                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(messagedPlayer + " has been removed from list!!!"));
                 messagedPlayer = "";
@@ -76,6 +77,18 @@ public class FriendBot {
                 messagedPlayer = "";
             }
             */
+        }
+
+        public void notifyViaWebhook(String content, String embedTittle, String embedDescription, OneColor embedColor) {
+            DiscordWebhookUtils.sendWebhookMessage(
+                    content,
+                    FriendBotConfig.webhookURL,
+                    FriendBotConfig.webhookUsername,
+                    FriendBotConfig.webhookAvatarURL,
+                    embedTittle,
+                    embedDescription,
+                    embedColor
+            );
         }
 
         private void sendMessagesInChunks(String name1, String fullMessage) {

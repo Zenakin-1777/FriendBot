@@ -104,28 +104,35 @@ public class FriendBotConfig extends Config {
     )
     public static String webhookAvatarURL = "https://freobot.vercel.app/assets/img/freo.png";
 
-    @Text(
-            name = "Title",
-            placeholder = "Cool Bot 420",
+    @Color(
+            name = "Start Color",
+            description = "Color of the embed when messages start sending",
             category = "Discord Integration",
             subcategory = "Webhook"
     )
-    public static String webhookTitle = "FriendBot Updates";
-
-    @Text(
-            name = "Description",
-            placeholder = "Info on FriendBot",
-            category = "Discord Integration",
-            subcategory = "Webhook"
-    )
-    public static String webhookDescription = "Update on FriendBot's status";
+    public static OneColor webhookColorStart = new OneColor(206, 56, 216);
 
     @Color(
-            name = "Color",
+            name = "Done Color",
+            description = "Color of the embed when all messages have been sent",
             category = "Discord Integration",
             subcategory = "Webhook"
     )
-    public static OneColor webhookColor = new OneColor(206, 56, 216);
+    public static OneColor webhookColorDone = new OneColor(206, 56, 216);
+
+    @Button(
+            name = "Reset",
+            text = "RESET",
+            description = "Return webhook settings to defaul values",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static void resetWebhookSettings() {
+        webhookUsername = "FriendBot";
+        webhookAvatarURL = "https://freobot.vercel.app/assets/img/freo.png";
+        webhookColorStart = new OneColor(30, 256, 30);
+        webhookColorDone = new OneColor(206, 56, 216);
+    }
 
     @Text(
             name = "Custom Message Contents",
