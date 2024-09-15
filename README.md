@@ -12,5 +12,6 @@ Future Features:
 - [QOL+] discord integration (remote control)
 
 Working on rn:
+- [QOL] add queue feature to avoid crashes when another IGN on the list joins while still messaging.
 - [QOL] add functionality to the Main Toggle
 - [QOL+] remote activation and message sending

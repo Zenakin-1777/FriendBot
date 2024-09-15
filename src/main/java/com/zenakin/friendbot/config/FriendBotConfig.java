@@ -353,22 +353,6 @@ public class FriendBotConfig extends Config {
     }
 
     @Button(
-            name = "Add IGN",
-            description = "Add the IGN of the player to the list",
-            text = "ADD",
-            category = "Name List",
-            subcategory = "EDIT",
-            size = 2
-    )
-    public static void addName() {
-        // Only add the name if it is not already in the set
-        if (!nameList.contains(name)) {
-            nameList.add(name);  // Automatically prevents duplicates
-            sortNameList();  // Sort the list alphabetically
-        }
-    }
-
-    @Button(
             name = "Remove IGN",
             description = "Remove the IGN of the player from the list",
             text = "REMOVE",
@@ -378,6 +362,23 @@ public class FriendBotConfig extends Config {
     )
     public static void removeName() {
         nameList.remove(name);
+    }
+
+    @Button(
+            name = "Add IGN",
+            description = "Add the IGN of the player to the list",
+            text = "ADD",
+            category = "Name List",
+            subcategory = "EDIT",
+            size = 2
+    )
+    public static void addName() {
+        name = name.toLowerCase();
+        // Only add the name if it is not already in the set
+        if (!nameList.contains(name)) {
+            nameList.add(name);  // Automatically prevents duplicates
+            sortNameList();  // Sort the list alphabetically
+        }
     }
 
     public static void removeNameExternally(String externalName) {

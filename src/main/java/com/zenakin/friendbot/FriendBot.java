@@ -154,7 +154,7 @@ public class FriendBot {
 
         public void extractContent(String message) {
             if (message.startsWith("Friend > ") && message.endsWith(" joined.")) {
-                extractedName = message.substring(9, message.length() - 8);
+                extractedName = message.substring(9, message.length() - 8).toLowerCase();
             }
         }
 
