@@ -1,6 +1,7 @@
 package com.zenakin.friendbot.config;
 
 import cc.polyfrost.oneconfig.config.annotations.Button;
+import cc.polyfrost.oneconfig.config.annotations.Color;
 import cc.polyfrost.oneconfig.config.annotations.Info;
 import cc.polyfrost.oneconfig.config.annotations.Number;
 import cc.polyfrost.oneconfig.config.annotations.Switch;
@@ -17,12 +18,23 @@ import com.zenakin.friendbot.utils.AudioManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 
+import java.awt.*;
+import java.io.*;
 import java.util.*;
+import java.util.List;
 
 public class FriendBotConfig extends Config {
     public static FriendBotConfig instance;
     public static List<String> nameList;
 
+    @Info(
+            text = "BACKING UP MORE THAN ONCE TO THE SAME DIRECTORY(PATH) WILL OVERWRITE ANY PREVIOUS BACKUPS!!!",
+            type = InfoType.WARNING,
+            size = 2
+    )
+    public static boolean backupWarning;
+
+    /*TODO: not implemented yet...
     @Switch(
             name = "Main Toggle",
             description = "Enable/Dissable most features of the mod",
@@ -30,7 +42,9 @@ public class FriendBotConfig extends Config {
             category = "General"
     )
     public static boolean isModEnabled = true;
+     */
 
+    /* TODO: FUTURE FEATURE??
     @Number(
             name = "Ping",
             description = "Your ping in milliseconds",
@@ -40,6 +54,37 @@ public class FriendBotConfig extends Config {
             category = "General"
     )
     public static int ping = 100;
+     */
+
+    @Text(
+            name = "Backup Path",
+            description = "DEFAULT: OneConfig\\ConfigBackup | EX: ConfigBackup | EX2: C:\\Users\\User\\Downloads\\ConfigBackup",
+            placeholder = "Paste the path here (no extension)",
+            category = "General"
+    )
+    public static String localBackupPath = "OneConfig\\ConfigBackup" + ".txt";
+
+    @Button(
+            name = "Backup Config",
+            description = "Save the current settings to another file",
+            text = "BACKUP",
+            category = "General"
+    )
+    public static void backupConfig() {
+        backupConfigToFile(localBackupPath);
+    }
+
+    /* TODO: make this work
+    @Button(
+            name = "Restore Config",
+            description = "Restore settings to the last backed-up state",
+            text = "RESTORE",
+            category = "General"
+    )
+    public static void restoreConfig() {
+        restoreConfigFromFile(localBackupPath);
+    }
+     */
 
     @Slider(
             name = "Sound Volume",
@@ -120,27 +165,84 @@ public class FriendBotConfig extends Config {
     )
     public static OneColor webhookColorDone = new OneColor(206, 56, 216);
 
+    @Color(
+            name = "Reply Color",
+            description = "Color of the embed when someone replies",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static OneColor webhookColorElse = new OneColor(200, 200, 0);
+
+    /* TODO: FUTURE FEATURE
+    @Color(
+            name = "Failed Color",
+            description = "Color of the embed when messages fail to fully send",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static OneColor webhookColorFailed = new OneColor(200, 0, 0);
+     */
+
+    @Switch(
+            name = "Mention Someone",
+            description = "Mention a role or individual whenever the webhook is sent",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static boolean mentionToggled = false;
+
+    @Text(
+            name = "Mention Role Name",
+            description = "The role or person to be @mentioned. You don't need to add the @",
+            placeholder = "everyone",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static String mentionRoleName = "everyone";
+
     @Button(
             name = "Reset",
             text = "RESET",
             description = "Return webhook settings to defaul values",
+            size = 2,
             category = "Discord Integration",
             subcategory = "Webhook"
     )
     public static void resetWebhookSettings() {
+        mentionToggled = false;
+        mentionRoleName = "everyone";
         webhookUsername = "FriendBot";
         webhookAvatarURL = "https://freobot.vercel.app/assets/img/freo.png";
-        webhookColorStart = new OneColor(30, 256, 30);
+        webhookColorStart = new OneColor(0, 200, 0);
         webhookColorDone = new OneColor(206, 56, 216);
+        webhookColorElse = new OneColor(200, 200, 0);
+        //TODO: FUTURE FEATURE
+        // webhookColorFailed = new OneColor(200, 0, 0);
     }
 
+    @Info(
+            text = "For better reply features when playing Hypixel, use the ChatTriggers module 'OurTools' which has an AFK feature called 'OurAFK' that is much better than this single reply. 'OurAFK' can even autojoin parties, send a custom AFK message in party chat, and leave.",
+            type = InfoType.INFO,
+            size = 2,
+            category = "Message Settings"
+    )
+    public static boolean replyInfo;
+
     @Text(
-            name = "Custom Message Contents",
+            name = "Custom Message",
             placeholder = "Paste your message here",
             multiline = true,
             category = "Message Settings"
     )
     public static String customMessage = "";
+
+    @Text(
+            name = "Custom Reply",
+            placeholder = "Paste your reply here",
+            multiline = true,
+            category = "Message Settings"
+    )
+    public static String customReply = "Sorry, can't talk rn. Plz reach out via Discord";
 
     @Info(
             text = "The timing settings are all in milliseconds. (More units will be added soon)",
@@ -203,6 +305,39 @@ public class FriendBotConfig extends Config {
     )
     public static String name = "";
 
+    @Text(
+            name = "File Path",
+            description = "DEFAULT: OneConfig\\ListBackup | EX: ListBackup | EX2: C:\\Users\\User\\Downloads\\ListBackup",
+            placeholder = "Paste the path here (no extension)",
+            size = OptionSize.DUAL,
+            category = "Name List",
+            subcategory = "Backup/Restore"
+    )
+    public static String localListPath = "OneConfig\\ListBackup" + ".txt";
+
+
+    @Button(
+            name = "Save IGN List",
+            description = "Save the current list of usernames to a local file",
+            text = "BACKUP",
+            category = "Name List",
+            subcategory = "Backup/Restore"
+    )
+    public static void saveList() {
+        saveListToFile(nameList, localListPath);
+    }
+
+    @Button(
+            name = "Load IGN List",
+            description = "Import the list of usernames from the local file. (if it has been backed up before)",
+            text = "RESTORE",
+            category = "Name List",
+            subcategory = "Backup/Restore"
+    )
+    public static void loadList() {
+        loadListFromFile(nameList, localListPath);
+    }
+
     @Button(
             name = "List IGNs",
             description = "Display the list of currently stored IGNs in chat",
@@ -218,12 +353,28 @@ public class FriendBotConfig extends Config {
     }
 
     @Button(
+            name = "Add IGN",
+            description = "Add the IGN of the player to the list",
+            text = "ADD",
+            category = "Name List",
+            subcategory = "EDIT",
+            size = 2
+    )
+    public static void addName() {
+        // Only add the name if it is not already in the set
+        if (!nameList.contains(name)) {
+            nameList.add(name);  // Automatically prevents duplicates
+            sortNameList();  // Sort the list alphabetically
+        }
+    }
+
+    @Button(
             name = "Remove IGN",
             description = "Remove the IGN of the player from the list",
             text = "REMOVE",
             category = "Name List",
             subcategory = "EDIT",
-            size = 1
+            size = 2
     )
     public static void removeName() {
         nameList.remove(name);
@@ -233,48 +384,36 @@ public class FriendBotConfig extends Config {
         nameList.remove(externalName);
     }
 
-    @Button(
-            name = "Add IGN",
-            description = "Add the IGN of the player to the list",
-            text = "ADD",
-            category = "Name List",
-            subcategory = "EDIT",
-            size = 1
-    )
-    public static void addName() {
-        // Play sound when adding a name
-        // OLD --> AudioManager.getInstance().playSound("friendbot:notification_ping.ogg");
-        // STILL NOT WORKING!!! --> AudioManager.playPingSound();
-        // This one worked: AudioManager.playLoudSound("friendbot:notification_ping", customVolume, customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
-
-        // Only add the name if it is not already in the set
-        if (!nameList.contains(name)) {
-            nameList.add(name);  // Automatically prevents duplicates
-            sortNameList();  // Sort the list alphabetically
-        }
-    }
-
-    /* TODO: make a backup button that will save lists as a restore point
-    @Button(
-            name = "List IGNs",
-            description = "Display the list of currently stored IGNs",
-            text = "LIST"
-    )
-     */
-
     @Info(
-            text = "THE FOLLOWING SETTINGS WILL ERASE ANY AND ALL NAMES FROM THE LIST!!!",
+            text = "THE FOLLOWING SETTINGS WILL ERASE ANY AND ALL NAMES FROM THE LIST!!! BACKING UP THE LIST BEFOREHAND IS RECOMMENDED",
             size = OptionSize.DUAL,
-            type = InfoType.ERROR,
+            type = InfoType.WARNING,
             category = "Name List",
             subcategory = "CLEAR"
     )
     public static boolean separator;
 
+    @Switch(
+            name = "Erase Clear Text",
+            description = "Toggle erasing the clear confirmation text box after clicking the clear button",
+            category = "Name List",
+            subcategory = "CLEAR"
+    )
+    public static boolean toggleClearErase = true;
+
+    @Text(
+            name = "CLEAR CONFIRMATION",
+            placeholder = "Type 'Clear' to confirm..",
+            category = "Name List",
+            subcategory = "CLEAR"
+    )
+    public static String clearCode = "";
+
     @Button(
             name = "Clear List",
             description = "CAUTION - WILL DELETE ALL NAMES IN THE LIST!!!",
             text = "CLEAR",
+            size = 2,
             category = "Name List",
             subcategory = "CLEAR"
     )
@@ -287,22 +426,7 @@ public class FriendBotConfig extends Config {
         }
     }
 
-    @Text(
-            name = "CLEAR CONFIRMATION",
-            placeholder = "Type 'Clear' to confirm..",
-            category = "Name List",
-            subcategory = "CLEAR"
-    )
-    public static String clearCode = "";
-
-    @Switch(
-            name = "Erase Clear Text",
-            description = "Toggle erasing the clear confirmation text box",
-            category = "Name List",
-            subcategory = "CLEAR"
-    )
-    public static boolean toggleClearErase = true;
-
+    /* TODO: FUTURE FEATURE?
     @Page(
             name = "Page TBD",
             location = PageLocation.BOTTOM,
@@ -311,6 +435,107 @@ public class FriendBotConfig extends Config {
             subcategory = "Pages"
     )
     public PageTBD pageTBD = new PageTBD();
+     */
+
+    public static void loadListFromFile(List<String> list, String filePath) {
+        File file = new File(filePath);
+
+        if (file.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (!list.contains(line)) {
+                        list.add(line);
+                        sortNameList();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace(); // Handle exceptions
+            }
+        } else {
+            FriendBot.notifyViaOneConfig(
+                    "File not found: " + filePath,
+                    () -> { });
+        }
+    }
+
+    public static void saveListToFile(List<String> list, String filepath) {
+        File filepath2 = new File(filepath);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filepath))) {
+            for (String item : list) {
+                writer.write(item);
+                writer.newLine(); // Add a new line after each item
+            }
+            String notificationContent = "List has been saved to " + filepath + ". Click to open";
+            FriendBot.notifyViaOneConfig(
+                    notificationContent,
+                    () -> {
+                        if (Desktop.isDesktopSupported()) {
+                            try {
+                                Desktop.getDesktop().open(filepath2);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void backupConfigToFile(String exportPath) {
+        File filepath3 = new File("OneConfig\\profiles\\Default Profile\\friendbot.json");
+        File filepath2 = new File(exportPath);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filepath3));
+             BufferedWriter writer = new BufferedWriter(new FileWriter(filepath2))) {
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                writer.write(line);
+                writer.newLine();
+            }
+
+            String notificationContent = "Config has been saved to " + filepath2 + ". Click to open";
+            FriendBot.notifyViaOneConfig(
+                    notificationContent,
+                    () -> {
+                        if (Desktop.isDesktopSupported()) {
+                            try {
+                                Desktop.getDesktop().open(filepath2);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void restoreConfigFromFile(String exportPath) {
+        File filepath2 = new File("OneConfig\\profiles\\Default Profile\\friendbot.json");
+        File filepath3 = new File(exportPath);
+
+        if (filepath3.exists()) {
+            try (BufferedReader reader = new BufferedReader(new FileReader(filepath3));
+                 BufferedWriter writer = new BufferedWriter(new FileWriter(filepath2))) {
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.write(line);
+                    writer.newLine();
+                }
+
+                String notificationContent = "Config has been restored";
+                FriendBot.notifyViaOneConfig(notificationContent, () -> { });
+            } catch (IOException e) {
+                e.printStackTrace(); // Handle exceptions
+            }
+        } else {
+            FriendBot.notifyViaOneConfig("File not found: " + exportPath, () -> { });
+        }
+    }
 
     // Method to sort the list alphabetically
     private static void sortNameList() {

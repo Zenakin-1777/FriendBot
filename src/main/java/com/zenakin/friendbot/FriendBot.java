@@ -1,6 +1,7 @@
 package com.zenakin.friendbot;
 
 import cc.polyfrost.oneconfig.config.core.OneColor;
+import cc.polyfrost.oneconfig.utils.Notifications;
 import com.zenakin.friendbot.config.FriendBotConfig;
 import com.zenakin.friendbot.utils.AudioManager;
 import com.zenakin.friendbot.utils.DiscordWebhookUtils;
@@ -14,7 +15,11 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 @Mod(modid = FriendBot.MODID, name = FriendBot.NAME, version = FriendBot.VERSION)
 public class FriendBot {
@@ -58,17 +63,17 @@ public class FriendBot {
                     @Override
                     public void run() {
                         sendMessagesInChunks(messagedPlayer, FriendBotConfig.customMessage);
-                        notifyViaWebhook("FriendBot Update","Listed player detected!", "Sending messages to player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorStart);
+                        notifyViaWebhook(mentionEveryone() + " FriendBot Update","Listed player detected!", "Sending messages to player: \n`" + messagedPlayer + "`",FriendBotConfig.webhookColorStart);
                     }
                 }, FriendBotConfig.initialMessageDelay);
             }
 
             //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
             if (message.startsWith("To") && message.endsWith(lastPart)) {
-                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                notifyViaWebhook("@everyone FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorDone);
+                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch + 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
+                notifyViaWebhook(mentionEveryone() + " FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorDone);
                 FriendBotConfig.removeNameExternally(messagedPlayer);
-                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(messagedPlayer + " has been removed from list!!!"));
+                notifyViaOneConfig(messagedPlayer + " has been removed from list!!!", () -> { });
                 messagedPlayer = "";
             }
             /* TODO: Failed check triggering prematurely
@@ -77,6 +82,20 @@ public class FriendBot {
                 messagedPlayer = "";
             }
             */
+
+            if (message.startsWith("From")) {
+                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch - 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
+                notifyViaWebhook(mentionEveryone() + " FriendBot Update","Someone Replied!!!", "Message: \n`" + message + "`",FriendBotConfig.webhookColorElse);
+                Minecraft.getMinecraft().thePlayer.sendChatMessage("/r " + FriendBotConfig.customReply);
+            }
+        }
+
+        public String mentionEveryone() {
+            if (FriendBotConfig.mentionToggled) {
+                return "@" + FriendBotConfig.mentionRoleName;
+            } else {
+                return "";
+            }
         }
 
         public void notifyViaWebhook(String content, String embedTittle, String embedDescription, OneColor embedColor) {
@@ -104,7 +123,7 @@ public class FriendBot {
                     public void run() {
                         Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + name1 + " " + message);
                     }
-                }, (long) FriendBotConfig.ping + ((long) i * FriendBotConfig.timeBetweenMessages));
+                }, /*TODO: FUTURE FEATURE???(long) FriendBotConfig.ping + */((long) i * FriendBotConfig.timeBetweenMessages));
             }
         }
 
@@ -143,6 +162,13 @@ public class FriendBot {
             return FriendBotConfig.nameList.contains(nameOnList);
         }
     }
-
-
+    public static void notifyViaOneConfig(String notificationContent, Runnable action) {
+        File fileToOpen = new File(FriendBotConfig.localListPath);
+        Notifications.INSTANCE.send(
+                "FriendBot",
+                notificationContent,
+                null,
+                5000,
+                action);
+    }
 }
