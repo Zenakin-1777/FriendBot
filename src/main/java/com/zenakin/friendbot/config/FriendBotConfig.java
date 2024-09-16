@@ -27,6 +27,8 @@ public class FriendBotConfig extends Config {
     public static FriendBotConfig instance;
     public static List<String> nameList;
 
+    // -- General --
+
     @Info(
             text = "BACKING UP MORE THAN ONCE TO THE SAME DIRECTORY(PATH) WILL OVERWRITE ANY PREVIOUS BACKUPS!!!",
             type = InfoType.WARNING,
@@ -34,7 +36,6 @@ public class FriendBotConfig extends Config {
     )
     public static boolean backupWarning;
 
-    /*TODO: not implemented yet...
     @Switch(
             name = "Main Toggle",
             description = "Enable/Dissable most features of the mod",
@@ -42,7 +43,6 @@ public class FriendBotConfig extends Config {
             category = "General"
     )
     public static boolean isModEnabled = true;
-     */
 
     /* TODO: FUTURE FEATURE??
     @Number(
@@ -86,6 +86,8 @@ public class FriendBotConfig extends Config {
     }
      */
 
+    // -- General -- | Sounds
+
     @Slider(
             name = "Sound Volume",
             description = "The volume of the sounds the mod will play",
@@ -117,6 +119,8 @@ public class FriendBotConfig extends Config {
         AudioManager.playLoudSound("friendbot:notification_ping", customVolume, customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
     }
 
+    // -- Discord Integration --
+
     @Info(
             text = "You must first create your own Discord server and webhook before changing these settings.",
             type = InfoType.INFO,
@@ -124,6 +128,8 @@ public class FriendBotConfig extends Config {
             category = "Discord Integration"
     )
     public static boolean webhookInfoLine;
+
+    // -- Discord Integration -- | Webhook
 
     @Text(
             name = "Webhook URL",
@@ -220,6 +226,8 @@ public class FriendBotConfig extends Config {
         // webhookColorFailed = new OneColor(200, 0, 0);
     }
 
+    // -- Message Settings --
+
     @Info(
             text = "For better reply features when playing Hypixel, use the ChatTriggers module 'OurTools' which has an AFK feature called 'OurAFK' that is much better than this single reply. 'OurAFK' can even autojoin parties, send a custom AFK message in party chat, and leave.",
             type = InfoType.INFO,
@@ -236,13 +244,44 @@ public class FriendBotConfig extends Config {
     )
     public static String customMessage = "";
 
+    // -- Message Settings -- | Replies
+
+    @Switch(
+            name = "Auto Reply",
+            description = "Toggle automatic replies. (webhook still sends when a reply is recieved)",
+            category = "Message Settings",
+            subcategory = "Replies"
+    )
+    public static boolean toggleReplies = true;
+
     @Text(
             name = "Custom Reply",
             placeholder = "Paste your reply here",
             multiline = true,
-            category = "Message Settings"
+            category = "Message Settings",
+            subcategory = "Replies"
     )
     public static String customReply = "Sorry, can't talk rn. Plz reach out via Discord";
+
+    @Switch(
+            name = "Receipt Confirmation Required",
+            description = "The other player must confirm they recieved the message before being removed from the list",
+            category = "Message Settings",
+            subcategory = "Replies"
+    )
+    public static boolean toggleMustConfirm = true;
+
+    @Text(
+            name = "Confirmation Message",
+            description = "Custom confirmation message. (Ex: Please reply with 'I understand' if you understand",
+            placeholder = "Paste confirmation request message here",
+            multiline = true,
+            category = "Message Settings",
+            subcategory = "Replies"
+    )
+    public static String customConfirmationMessage = "Please reply with 'ok 69 420' if you have read the previous messages..";
+
+    // -- Message Settings -- | Message Timing
 
     @Info(
             text = "The timing settings are all in milliseconds. (More units will be added soon)",
@@ -297,13 +336,60 @@ public class FriendBotConfig extends Config {
     )
     public static int messageLength = 80;
 
+    // -- Name List -- | Edit
+
     @Text(
             name = "IGN of the player",
             placeholder = "Put a username here",
             category = "Name List",
-            subcategory = "EDIT"
+            subcategory = "Edit"
     )
     public static String name = "";
+
+    @Button(
+            name = "List IGNs",
+            description = "Display the list of currently stored IGNs in chat",
+            text = "LIST",
+            category = "Name List",
+            subcategory = "Edit",
+            size = 1
+    )
+    public static void a_listNames() {
+        for (String IGN : nameList) {
+            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(IGN));
+        }
+    }
+
+    @Button(
+            name = "Add IGN",
+            description = "Add the IGN of the player to the list",
+            text = "ADD",
+            category = "Name List",
+            subcategory = "Edit",
+            size = 2
+    )
+    public static void b_addName() {
+        name = name.toLowerCase();
+        // Only add the name if it is not already in the set
+        if (!nameList.contains(name)) {
+            nameList.add(name);  // Automatically prevents duplicates
+            sortNameList();  // Sort the list alphabetically
+        }
+    }
+
+    @Button(
+            name = "Remove IGN",
+            description = "Remove the IGN of the player from the list",
+            text = "REMOVE",
+            category = "Name List",
+            subcategory = "Edit",
+            size = 2
+    )
+    public static void c_removeName() {
+        nameList.remove(name);
+    }
+
+    // -- Name List -- | Backup/Restore
 
     @Text(
             name = "File Path",
@@ -315,7 +401,6 @@ public class FriendBotConfig extends Config {
     )
     public static String localListPath = "OneConfig\\ListBackup" + ".txt";
 
-
     @Button(
             name = "Save IGN List",
             description = "Save the current list of usernames to a local file",
@@ -323,7 +408,7 @@ public class FriendBotConfig extends Config {
             category = "Name List",
             subcategory = "Backup/Restore"
     )
-    public static void saveList() {
+    public static void b_saveList() {
         saveListToFile(nameList, localListPath);
     }
 
@@ -334,56 +419,11 @@ public class FriendBotConfig extends Config {
             category = "Name List",
             subcategory = "Backup/Restore"
     )
-    public static void loadList() {
+    public static void a_loadList() {
         loadListFromFile(nameList, localListPath);
     }
 
-    @Button(
-            name = "List IGNs",
-            description = "Display the list of currently stored IGNs in chat",
-            text = "LIST",
-            category = "Name List",
-            subcategory = "EDIT",
-            size = 1
-    )
-    public static void listNames() {
-        for (String IGN : nameList) {
-            Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(IGN));
-        }
-    }
-
-    @Button(
-            name = "Remove IGN",
-            description = "Remove the IGN of the player from the list",
-            text = "REMOVE",
-            category = "Name List",
-            subcategory = "EDIT",
-            size = 2
-    )
-    public static void removeName() {
-        nameList.remove(name);
-    }
-
-    @Button(
-            name = "Add IGN",
-            description = "Add the IGN of the player to the list",
-            text = "ADD",
-            category = "Name List",
-            subcategory = "EDIT",
-            size = 2
-    )
-    public static void addName() {
-        name = name.toLowerCase();
-        // Only add the name if it is not already in the set
-        if (!nameList.contains(name)) {
-            nameList.add(name);  // Automatically prevents duplicates
-            sortNameList();  // Sort the list alphabetically
-        }
-    }
-
-    public static void removeNameExternally(String externalName) {
-        nameList.remove(externalName);
-    }
+    // -- Name List -- | CLEAR
 
     @Info(
             text = "THE FOLLOWING SETTINGS WILL ERASE ANY AND ALL NAMES FROM THE LIST!!! BACKING UP THE LIST BEFOREHAND IS RECOMMENDED",
@@ -427,6 +467,8 @@ public class FriendBotConfig extends Config {
         }
     }
 
+    // -- OTHER --
+
     /* TODO: FUTURE FEATURE?
     @Page(
             name = "Page TBD",
@@ -437,6 +479,10 @@ public class FriendBotConfig extends Config {
     )
     public PageTBD pageTBD = new PageTBD();
      */
+
+    public static void removeNameExternally(String externalName) {
+        nameList.remove(externalName);
+    }
 
     public static void loadListFromFile(List<String> list, String filePath) {
         File file = new File(filePath);
@@ -546,8 +592,69 @@ public class FriendBotConfig extends Config {
         nameList.addAll(sortedList);  // Add the sorted names back to the set
     }
 
+    public Boolean lambda(String dependentOption) {
+        try {
+            return (boolean) optionNames.get(dependentOption).get();
+        } catch (IllegalAccessException ignored) {
+            return true;
+        }
+    }
+
     public FriendBotConfig() {
         super(new Mod(FriendBot.NAME, ModType.UTIL_QOL, "/assets/friendbot/logo.png"), FriendBot.MODID + ".json");
         initialize();
+
+        try {
+            optionNames.get("backupWarning").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("localBackupPath").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("backupConfig").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("customVolume").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("customPitch").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("playSound").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("webhookInfoLine").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookURL").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookUsername").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookAvatarURL").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookColorStart").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookColorDone").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookColorElse").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("mentionToggled").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("mentionRoleName").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("resetWebhookSettings").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("replyInfo").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("customMessage").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("toggleReplies").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("customReply").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("timingInfo").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("initialMessageDelay").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("timeBetweenMessages").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("messageLength").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("name").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("addName").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("removeName").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("listNames").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("localListPath").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("saveList").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("loadList").addHideCondition(() -> !lambda("isModEnabled"));
+
+            optionNames.get("separator").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("toggleClearErase").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("clearCode").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("clearNameList").addHideCondition(() -> !lambda("isModEnabled"));
+
+
+
+            optionNames.get("customReply").addHideCondition(() -> !lambda("toggleReplies"));
+            optionNames.get("mentionRoleName").addHideCondition(() -> !lambda("mentionToggled"));
+            optionNames.get("customConfirmationMessage").addHideCondition(() -> !lambda("toggleMustConfirm"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -33,6 +33,7 @@ public class FriendBot {
     public static String lastPart;
     public static String extractedName = "";
     public static String messagedPlayer = "";
+    public static String customConfirmMessage = FriendBotConfig.customConfirmationMessage;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
@@ -50,32 +51,45 @@ public class FriendBot {
     public static class ChatEventHandler {
         @SubscribeEvent(priority = EventPriority.HIGH)
         public void onClientChatReceived(ClientChatReceivedEvent event) {
-            // Get the chat message
-            String message = event.message.getUnformattedText();
-            extractContent(message);
+            if (FriendBotConfig.isModEnabled) {
+                // Get the chat message
+                String message = event.message.getUnformattedText();
+                extractContent(message);
 
-            if (!Objects.equals(extractedName, "") && isOnList(extractedName)) {
-                messagedPlayer = extractedName;
-                extractedName = "";
-                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                // Schedule message sending with a delay
-                new Timer().schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        sendMessagesInChunks(messagedPlayer, FriendBotConfig.customMessage);
-                        notifyViaWebhook(mentionEveryone() + " FriendBot Update","Listed player detected!", "Sending messages to player: \n`" + messagedPlayer + "`",FriendBotConfig.webhookColorStart);
+                if (!Objects.equals(extractedName, "") && isOnList(extractedName)) {
+                    messagedPlayer = extractedName;
+                    extractedName = "";
+                    AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch, Minecraft.getMinecraft().thePlayer.getPositionVector());
+                    // Schedule message sending with a delay
+                    new Timer().schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            sendMessagesInChunks(messagedPlayer, FriendBotConfig.customMessage);
+                            notifyViaWebhook(mentionEveryone() + " FriendBot Update","Listed player detected!", "Sending messages to player: \n`" + messagedPlayer + "`",FriendBotConfig.webhookColorStart);
+                        }
+                    }, FriendBotConfig.initialMessageDelay);
+                }
+
+                //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
+                if (message.startsWith("To") && message.endsWith(lastPart)) {
+                    Timer timer2 = new Timer();
+                    AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch + 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
+                    notifyViaWebhook(mentionEveryone() + " FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorDone);
+
+                    String formattedMessage2 = message.toLowerCase();
+                    if (FriendBotConfig.toggleMustConfirm) Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " " + customConfirmMessage);
+                    if (!FriendBotConfig.toggleMustConfirm || formattedMessage2.contains(customConfirmMessage)) {
+                        FriendBotConfig.removeNameExternally(messagedPlayer);
+                        notifyViaOneConfig(messagedPlayer + " has been removed from list!!!", () -> { });
                     }
-                }, FriendBotConfig.initialMessageDelay);
-            }
 
-            //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
-            if (message.startsWith("To") && message.endsWith(lastPart)) {
-                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch + 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                notifyViaWebhook(mentionEveryone() + " FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorDone);
-                FriendBotConfig.removeNameExternally(messagedPlayer);
-                notifyViaOneConfig(messagedPlayer + " has been removed from list!!!", () -> { });
-                messagedPlayer = "";
-            }
+                    timer2.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            messagedPlayer = "";
+                        }
+                    }, 300000);
+                }
             /* TODO: Failed check triggering prematurely
             else if (!Objects.equals(messagedPlayer, "")) {
                 DiscordWebhookUtils.sendWebhookMessage("@everyone ERROR: Didn't finish sending message to [" + messagedPlayer + "]..");
@@ -83,10 +97,16 @@ public class FriendBot {
             }
             */
 
-            if (message.startsWith("From")) {
-                AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch - 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                notifyViaWebhook(mentionEveryone() + " FriendBot Update","Someone Replied!!!", "Message: \n`" + message + "`",FriendBotConfig.webhookColorElse);
-                Minecraft.getMinecraft().thePlayer.sendChatMessage("/r " + FriendBotConfig.customReply);
+                String formattedMessage = message.toLowerCase();
+
+                if (message.startsWith("From") && formattedMessage.contains(messagedPlayer) && !messagedPlayer.isEmpty()) {
+                    AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch - 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
+                    notifyViaWebhook(mentionEveryone() + " FriendBot Update","Someone Replied!!!", "Message: \n`" + message + "`",FriendBotConfig.webhookColorElse);
+
+                    if (FriendBotConfig.toggleReplies) {
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " " + FriendBotConfig.customReply);
+                    }
+                }
             }
         }
 
