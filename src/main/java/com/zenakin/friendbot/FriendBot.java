@@ -15,9 +15,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 
-import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -31,9 +29,11 @@ public class FriendBot {
     public static FriendBot instance;
     public FriendBotConfig config;
     public static String lastPart;
+    public static String lastSentMessage;
     public static String extractedName = "";
     public static String messagedPlayer = "";
     public static String customConfirmMessage = FriendBotConfig.customConfirmationMessage;
+    public static boolean doneSendingMessage;
 
     @Mod.EventHandler
     public void init(FMLInitializationEvent event) {
@@ -65,7 +65,7 @@ public class FriendBot {
                         @Override
                         public void run() {
                             sendMessagesInChunks(messagedPlayer, FriendBotConfig.customMessage);
-                            notifyViaWebhook(mentionEveryone() + " FriendBot Update","Listed player detected!", "Sending messages to player: \n`" + messagedPlayer + "`",FriendBotConfig.webhookColorStart);
+                            notifyViaWebhook(mentionEveryone() + " FriendBot Update","Listed player detected!", "Sending messages to player: \n`" + messagedPlayer + "`",embedColor("webhookColorStart"));
                         }
                     }, FriendBotConfig.initialMessageDelay);
                 }
@@ -73,14 +73,28 @@ public class FriendBot {
                 //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
                 if (message.startsWith("To") && message.endsWith(lastPart)) {
                     Timer timer2 = new Timer();
+                    Timer timer3 = new Timer();
                     AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch + 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                    notifyViaWebhook(mentionEveryone() + " FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",FriendBotConfig.webhookColorDone);
+                    notifyViaWebhook(mentionEveryone() + " FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",embedColor("webhookColorDone"));
 
                     String formattedMessage2 = message.toLowerCase();
-                    if (FriendBotConfig.toggleMustConfirm) Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " " + customConfirmMessage);
+                    if (FriendBotConfig.toggleMustConfirm) {
+                        doneSendingMessage = false;
+                        timer3.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " Please reply ('/r message' to reply) with '" + customConfirmMessage + "' to confirm that you have read the previous messages..");
+                                lastSentMessage = "/t " + messagedPlayer + " Please reply ('/r message' to reply) with '" + customConfirmMessage + "' to confirm that you have read the previous messages..";
+                                doneSendingMessage = true;
+                            }
+                        }, 800);
+                    }
+                    // DEBUGGING:
+                    notifyViaWebhook("FriendBot Update","Debugging Info","Last Part of the split messages:\n'" + lastPart + "'\n\nLast sent message: \n'" + lastSentMessage + "'\n\nReceived reply in lower case: \n'" + formattedMessage2 + "'",embedColor(null));
                     if (!FriendBotConfig.toggleMustConfirm || formattedMessage2.contains(customConfirmMessage)) {
                         FriendBotConfig.removeNameExternally(messagedPlayer);
                         notifyViaOneConfig(messagedPlayer + " has been removed from list!!!", () -> { });
+                        notifyViaWebhook(mentionEveryone() + " FriendBot Update","List Updated", "Player removed from list: \n`" + messagedPlayer + "`",embedColor("webhookColorRemovedFromList"));
                     }
 
                     timer2.schedule(new TimerTask() {
@@ -101,12 +115,36 @@ public class FriendBot {
 
                 if (message.startsWith("From") && formattedMessage.contains(messagedPlayer) && !messagedPlayer.isEmpty()) {
                     AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch - 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
-                    notifyViaWebhook(mentionEveryone() + " FriendBot Update","Someone Replied!!!", "Message: \n`" + message + "`",FriendBotConfig.webhookColorElse);
+                    notifyViaWebhook(mentionEveryone() + " FriendBot Update","Someone Replied!!!", "Message: \n`" + message + "`",embedColor("webhookColorReply"));
 
                     if (FriendBotConfig.toggleReplies) {
+                        while (!doneSendingMessage) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " " + FriendBotConfig.customReply);
+                        lastSentMessage = "/t " + messagedPlayer + " " + FriendBotConfig.customReply;
                     }
                 }
+            }
+        }
+
+        public OneColor embedColor(String situation) {
+            if (FriendBotConfig.webhookCustomColorsToggled) {
+                if (Objects.equals(situation, "webhookColorRemovedFromList")) return FriendBotConfig.webhookColorRemovedFromList;
+                else if (Objects.equals(situation, "webhookColorReply")) return FriendBotConfig.webhookColorReply;
+                else if (Objects.equals(situation, "webhookColorDone")) return FriendBotConfig.webhookColorDone;
+                else if (Objects.equals(situation, "webhookColorStart")) return FriendBotConfig.webhookColorStart;
+                else return new OneColor(255,255,255);
+            } else {
+                if (Objects.equals(situation, "webhookColorRemovedFromList")) return new OneColor(64, 224, 208);
+                else if (Objects.equals(situation, "webhookColorReply")) return new OneColor(200, 200, 0);
+                else if (Objects.equals(situation, "webhookColorDone")) return new OneColor(206, 56, 216);
+                else if (Objects.equals(situation, "webhookColorStart")) return new OneColor(0, 200, 0);
+                else return new OneColor(255,255,255);
             }
         }
 
@@ -132,9 +170,12 @@ public class FriendBot {
 
         private void sendMessagesInChunks(String name1, String fullMessage) {
             List<String> messages = splitMessage(fullMessage, FriendBotConfig.messageLength);
-            lastPart = messages.get(messages.size() - 1);
+            if (!Objects.equals(lastPart, messages.get(messages.size() - 1))) lastPart = messages.get(messages.size() - 1);
 
             Timer timer = new Timer();
+            Timer timer1 = new Timer();
+            doneSendingMessage = false;
+
             for (int i = 0; i < messages.size(); i++) {
                 final String message = messages.get(i);
                 // Schedule each message with a delay
@@ -142,9 +183,18 @@ public class FriendBot {
                     @Override
                     public void run() {
                         Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + name1 + " " + message);
+                        lastSentMessage = message;
                     }
                 }, /*TODO: FUTURE FEATURE???(long) FriendBotConfig.ping + */((long) i * FriendBotConfig.timeBetweenMessages));
             }
+
+            timer1.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    doneSendingMessage = true;
+                }
+            }, ((long) messages.size() * FriendBotConfig.timeBetweenMessages));
+
         }
 
         private List<String> splitMessage(String message, int maxLength) {

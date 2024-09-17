@@ -13,7 +13,6 @@ import cc.polyfrost.oneconfig.config.Config;
 import cc.polyfrost.oneconfig.config.annotations.*;
 import cc.polyfrost.oneconfig.config.data.*;
 import com.zenakin.friendbot.FriendBot;
-import com.zenakin.friendbot.config.pages.PageTBD;
 import com.zenakin.friendbot.utils.AudioManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
@@ -134,6 +133,8 @@ public class FriendBotConfig extends Config {
     @Text(
             name = "Webhook URL",
             placeholder = "https://discord.com/api/webhooks/...",
+            size = 2,
+            secure = true,
             category = "Discord Integration",
             subcategory = "Webhook"
     )
@@ -155,13 +156,22 @@ public class FriendBotConfig extends Config {
     )
     public static String webhookAvatarURL = "https://freobot.vercel.app/assets/img/freo.png";
 
+    @Switch(
+            name = "Custom Colors",
+            description = "Change the color the webhook embed",
+            size = 2,
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static boolean webhookCustomColorsToggled = false;
+
     @Color(
             name = "Start Color",
             description = "Color of the embed when messages start sending",
             category = "Discord Integration",
             subcategory = "Webhook"
     )
-    public static OneColor webhookColorStart = new OneColor(206, 56, 216);
+    public static OneColor webhookColorStart = new OneColor(0, 200, 0);
 
     @Color(
             name = "Done Color",
@@ -177,7 +187,15 @@ public class FriendBotConfig extends Config {
             category = "Discord Integration",
             subcategory = "Webhook"
     )
-    public static OneColor webhookColorElse = new OneColor(200, 200, 0);
+    public static OneColor webhookColorReply = new OneColor(200, 200, 0);
+
+    @Color(
+            name = "List Update Color",
+            description = "Color of the embed when someone is removed from the list",
+            category = "Discord Integration",
+            subcategory = "Webhook"
+    )
+    public static OneColor webhookColorRemovedFromList = new OneColor(64, 224, 208);
 
     /* TODO: FUTURE FEATURE
     @Color(
@@ -216,12 +234,14 @@ public class FriendBotConfig extends Config {
     )
     public static void resetWebhookSettings() {
         mentionToggled = false;
+        webhookCustomColorsToggled = false;
         mentionRoleName = "everyone";
         webhookUsername = "FriendBot";
         webhookAvatarURL = "https://freobot.vercel.app/assets/img/freo.png";
         webhookColorStart = new OneColor(0, 200, 0);
         webhookColorDone = new OneColor(206, 56, 216);
-        webhookColorElse = new OneColor(200, 200, 0);
+        webhookColorReply = new OneColor(200, 200, 0);
+        webhookColorRemovedFromList = new OneColor(64, 224, 208);
         //TODO: FUTURE FEATURE
         // webhookColorFailed = new OneColor(200, 0, 0);
     }
@@ -254,6 +274,14 @@ public class FriendBotConfig extends Config {
     )
     public static boolean toggleReplies = true;
 
+    @Switch(
+            name = "Receipt Confirmation Required",
+            description = "The other player must confirm they recieved the message by repyling with a given code before being removed from the list",
+            category = "Message Settings",
+            subcategory = "Replies"
+    )
+    public static boolean toggleMustConfirm = true;
+
     @Text(
             name = "Custom Reply",
             placeholder = "Paste your reply here",
@@ -263,23 +291,16 @@ public class FriendBotConfig extends Config {
     )
     public static String customReply = "Sorry, can't talk rn. Plz reach out via Discord";
 
-    @Switch(
-            name = "Receipt Confirmation Required",
-            description = "The other player must confirm they recieved the message before being removed from the list",
-            category = "Message Settings",
-            subcategory = "Replies"
-    )
-    public static boolean toggleMustConfirm = true;
-
     @Text(
-            name = "Confirmation Message",
-            description = "Custom confirmation message. (Ex: Please reply with 'I understand' if you understand",
-            placeholder = "Paste confirmation request message here",
-            multiline = true,
+            name = "Confirmation Code",
+            description = "Custom confirmation code. (Ex code: 'I Understand' will be sent as 'Please reply with [I Understand] if you have properly recieved this message'.",
+            placeholder = "Paste confirmation code here",
+            multiline = false,
+            size = 2,
             category = "Message Settings",
             subcategory = "Replies"
     )
-    public static String customConfirmationMessage = "Please reply with 'ok 69 420' if you have read the previous messages..";
+    public static String customConfirmationMessage = "ok 69 420";
 
     // -- Message Settings -- | Message Timing
 
@@ -467,7 +488,7 @@ public class FriendBotConfig extends Config {
         }
     }
 
-    // -- OTHER --
+    // -- Other --
 
     /* TODO: FUTURE FEATURE?
     @Page(
@@ -605,54 +626,66 @@ public class FriendBotConfig extends Config {
         initialize();
 
         try {
+            // -- General --
             optionNames.get("backupWarning").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("localBackupPath").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("backupConfig").addHideCondition(() -> !lambda("isModEnabled"));
-
+            // -- General -- | Sounds
             optionNames.get("customVolume").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("customPitch").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("playSound").addHideCondition(() -> !lambda("isModEnabled"));
-
+            // -- Discord Integration --
             optionNames.get("webhookInfoLine").addHideCondition(() -> !lambda("isModEnabled"));
+            // -- Discord Integration -- | Webhook
             optionNames.get("webhookURL").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("webhookUsername").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("webhookAvatarURL").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookCustomColorsToggled").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("webhookColorStart").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("webhookColorDone").addHideCondition(() -> !lambda("isModEnabled"));
-            optionNames.get("webhookColorElse").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookColorReply").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("webhookColorRemovedFromList").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("mentionToggled").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("mentionRoleName").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("resetWebhookSettings").addHideCondition(() -> !lambda("isModEnabled"));
-
+            // -- Message Settings --
             optionNames.get("replyInfo").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("customMessage").addHideCondition(() -> !lambda("isModEnabled"));
+            // -- Message Settings -- | Replies
             optionNames.get("toggleReplies").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("customReply").addHideCondition(() -> !lambda("isModEnabled"));
-
+            optionNames.get("toggleMustConfirm").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("customConfirmationMessage").addHideCondition(() -> !lambda("isModEnabled"));
+            // -- Message Settings -- | Message Timing
             optionNames.get("timingInfo").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("initialMessageDelay").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("timeBetweenMessages").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("messageLength").addHideCondition(() -> !lambda("isModEnabled"));
-
+            // -- Name List -- | Edit
             optionNames.get("name").addHideCondition(() -> !lambda("isModEnabled"));
-            optionNames.get("addName").addHideCondition(() -> !lambda("isModEnabled"));
-            optionNames.get("removeName").addHideCondition(() -> !lambda("isModEnabled"));
-            optionNames.get("listNames").addHideCondition(() -> !lambda("isModEnabled"));
-
+            optionNames.get("b_addName").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("c_removeName").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("a_listNames").addHideCondition(() -> !lambda("isModEnabled"));
+            // -- Name List -- Backup/Restore
             optionNames.get("localListPath").addHideCondition(() -> !lambda("isModEnabled"));
-            optionNames.get("saveList").addHideCondition(() -> !lambda("isModEnabled"));
-            optionNames.get("loadList").addHideCondition(() -> !lambda("isModEnabled"));
-
+            optionNames.get("b_saveList").addHideCondition(() -> !lambda("isModEnabled"));
+            optionNames.get("a_loadList").addHideCondition(() -> !lambda("isModEnabled"));
+            // -- Name List -- CLEAR
             optionNames.get("separator").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("toggleClearErase").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("clearCode").addHideCondition(() -> !lambda("isModEnabled"));
             optionNames.get("clearNameList").addHideCondition(() -> !lambda("isModEnabled"));
 
-
+            // -- OTHER --
 
             optionNames.get("customReply").addHideCondition(() -> !lambda("toggleReplies"));
             optionNames.get("mentionRoleName").addHideCondition(() -> !lambda("mentionToggled"));
             optionNames.get("customConfirmationMessage").addHideCondition(() -> !lambda("toggleMustConfirm"));
+            optionNames.get("webhookColorStart").addHideCondition(() -> !lambda("webhookCustomColorsToggled"));
+            optionNames.get("webhookColorDone").addHideCondition(() -> !lambda("webhookCustomColorsToggled"));
+            optionNames.get("webhookColorReply").addHideCondition(() -> !lambda("webhookCustomColorsToggled"));
+            optionNames.get("webhookColorRemovedFromList").addHideCondition(() -> !lambda("webhookCustomColorsToggled"));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
