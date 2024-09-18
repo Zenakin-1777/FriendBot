@@ -32,7 +32,7 @@ public class FriendBot {
     public static String lastSentMessage;
     public static String extractedName = "";
     public static String messagedPlayer = "";
-    public static String customConfirmMessage = FriendBotConfig.customConfirmationMessage;
+    //TODO: BROKEN ATM public static String customConfirmMessage = FriendBotConfig.customConfirmationMessage;
     public static boolean doneSendingMessage;
 
     @Mod.EventHandler
@@ -73,29 +73,33 @@ public class FriendBot {
                 //DEBUGGIN: Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText(lastPart));
                 if (message.startsWith("To") && message.endsWith(lastPart)) {
                     Timer timer2 = new Timer();
-                    Timer timer3 = new Timer();
                     AudioManager.playLoudSound("friendbot:notification_ping", FriendBotConfig.customVolume, FriendBotConfig.customPitch + 0.5f, Minecraft.getMinecraft().thePlayer.getPositionVector());
                     notifyViaWebhook(mentionEveryone() + " FriendBot Update","Finished sending messages", "Target player: `" + messagedPlayer + "`",embedColor("webhookColorDone"));
 
                     String formattedMessage2 = message.toLowerCase();
+                    /*TODO: BROKEN ATM
                     if (FriendBotConfig.toggleMustConfirm) {
-                        doneSendingMessage = false;
-                        timer3.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " Please reply ('/r message' to reply) with '" + customConfirmMessage + "' to confirm that you have read the previous messages..");
-                                lastSentMessage = "/t " + messagedPlayer + " Please reply ('/r message' to reply) with '" + customConfirmMessage + "' to confirm that you have read the previous messages..";
-                                doneSendingMessage = true;
+                        while (!doneSendingMessage) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
                             }
-                        }, 800);
+                        }
+                        doneSendingMessage = false;
+                        Minecraft.getMinecraft().thePlayer.sendChatMessage("/t " + messagedPlayer + " Please reply ('/r message' to reply) with '" + customConfirmMessage + "' to confirm that you have read the previous messages..");
+                        lastSentMessage = "/t " + messagedPlayer + " Please reply ('/r message' to reply) with '" + customConfirmMessage + "' to confirm that you have read the previous messages..";
+                        doneSendingMessage = true;
                     }
+                     */
                     // DEBUGGING:
                     notifyViaWebhook("FriendBot Update","Debugging Info","Last Part of the split messages:\n'" + lastPart + "'\n\nLast sent message: \n'" + lastSentMessage + "'\n\nReceived reply in lower case: \n'" + formattedMessage2 + "'",embedColor(null));
-                    if (!FriendBotConfig.toggleMustConfirm || formattedMessage2.contains(customConfirmMessage)) {
+                    //TODO: BROKEN ATM
+                    //if (!FriendBotConfig.toggleMustConfirm || formattedMessage2.contains(customConfirmMessage)) {
                         FriendBotConfig.removeNameExternally(messagedPlayer);
                         notifyViaOneConfig(messagedPlayer + " has been removed from list!!!", () -> { });
                         notifyViaWebhook(mentionEveryone() + " FriendBot Update","List Updated", "Player removed from list: \n`" + messagedPlayer + "`",embedColor("webhookColorRemovedFromList"));
-                    }
+                    //}
 
                     timer2.schedule(new TimerTask() {
                         @Override

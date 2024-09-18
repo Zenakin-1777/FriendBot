@@ -132,7 +132,7 @@ public class FriendBotConfig extends Config {
 
     @Text(
             name = "Webhook URL",
-            placeholder = "https://discord.com/api/webhooks/...",
+            placeholder = "Paste URL here",
             size = 2,
             secure = true,
             category = "Discord Integration",
@@ -142,7 +142,7 @@ public class FriendBotConfig extends Config {
 
     @Text(
             name = "Username",
-            placeholder = "FriendBot",
+            placeholder = "Please enter a name",
             category = "Discord Integration",
             subcategory = "Webhook"
     )
@@ -150,7 +150,7 @@ public class FriendBotConfig extends Config {
 
     @Text(
             name = "Avatar URL",
-            placeholder = "https://image.site.com/assets/img/icon.png",
+            placeholder = "Paste image link here",
             category = "Discord Integration",
             subcategory = "Webhook"
     )
@@ -274,6 +274,7 @@ public class FriendBotConfig extends Config {
     )
     public static boolean toggleReplies = true;
 
+    /*TODO: BROKEN ATM
     @Switch(
             name = "Receipt Confirmation Required",
             description = "The other player must confirm they recieved the message by repyling with a given code before being removed from the list",
@@ -281,6 +282,7 @@ public class FriendBotConfig extends Config {
             subcategory = "Replies"
     )
     public static boolean toggleMustConfirm = true;
+     */
 
     @Text(
             name = "Custom Reply",
@@ -291,6 +293,7 @@ public class FriendBotConfig extends Config {
     )
     public static String customReply = "Sorry, can't talk rn. Plz reach out via Discord";
 
+    /*TODO: BROKEN ATM
     @Text(
             name = "Confirmation Code",
             description = "Custom confirmation code. (Ex code: 'I Understand' will be sent as 'Please reply with [I Understand] if you have properly recieved this message'.",
@@ -301,6 +304,7 @@ public class FriendBotConfig extends Config {
             subcategory = "Replies"
     )
     public static String customConfirmationMessage = "ok 69 420";
+     */
 
     // -- Message Settings -- | Message Timing
 
