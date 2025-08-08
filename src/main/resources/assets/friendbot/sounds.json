@@ -1,5 +1,0 @@
-{
-  "notification_ping": {
-    "sounds": [{"name": "notification_ping", "steam":  true}], "category": "master"
-  }
-}
